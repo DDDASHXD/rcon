@@ -5,7 +5,10 @@ const DarkModeToggle = () => {
   const { theme, setTheme, resolvedTheme } = useTheme();
 
   return (
-    <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+    <button
+      className="text-sm"
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+    >
       {resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
     </button>
   );
