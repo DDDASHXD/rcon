@@ -2,6 +2,7 @@
   "pz": {
     "name": "Project Zomboid",
     "commands": [
+      "clear",
       "additem",
       "addvehicle",
       "addxp",
@@ -94,6 +95,7 @@
       "voiceban"
     ],
     "commandDescriptions": {
+      "clear": "Clear the command history (local command)",
       "additem": "Add items to player inventory",
       "addvehicle": "Spawn a vehicle",
       "addxp": "Add experience points",
