@@ -11,6 +11,7 @@ import {
 import { Response, GameConfig } from "@/types/rcon";
 import config from "@/config.json";
 import DarkModeToggle from "../dark-mode";
+import Link from "next/link";
 
 const typedConfig = config as GameConfig;
 
@@ -62,14 +63,17 @@ export const CommandInterface: React.FC<CommandInterfaceProps> = ({
   }, [responses]);
 
   return (
-    <div
-      className="font-mono p-2 flex flex-col h-screen w-full"
-      onClick={() => input.current?.focus()}
-    >
+    <div className="font-mono p-2 flex flex-col h-screen w-full">
       <div className="flex flex-col h-full w-full">
         <div className="flex justify-between items-center mb-4">
           <div className="text-sm text-gray-500">{connectionInfo}</div>
           <div className="flex gap-6">
+            <Link
+              href="https://github.com/DDDASHXD/rcon"
+              className="text-sm hover:text-gray-700"
+            >
+              View on GitHub
+            </Link>
             <DarkModeToggle />
             <button
               onClick={onDisconnect}
@@ -93,11 +97,12 @@ export const CommandInterface: React.FC<CommandInterfaceProps> = ({
           <div className="w-full flex relative">
             <Input
               type="text"
-              className="h-max w-full border-none p-0 m-0"
+              className="h-max w-full p-0 m-0"
               value={inputValue}
               onChange={(e) => onInputChange(e.target.value)}
               ref={input}
               onKeyDown={handleInput}
+              autoFocus
             />
             {showDropdown && filteredCommands.length > 0 && (
               <div className="flex flex-col bg-background p-1 rounded-md absolute bottom-[calc(100%+10px)] max-h-[600px] overflow-y-auto border">
