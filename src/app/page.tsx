@@ -16,18 +16,8 @@ const Home = () => {
     handleDisconnect
   } = useRconConnection();
 
-  const {
-    responses,
-    game,
-    inputValue,
-    filteredCommands,
-    selectedIndex,
-    showDropdown,
-    setGame,
-    setInputValue,
-    sendCommand,
-    handleCommandSelection
-  } = useRconCommands(connection);
+  const { responses, game, inputValue, setGame, setInputValue, sendCommand } =
+    useRconCommands(connection);
 
   // Wrap handleConnect to match expected type
   const handleConnect = async () => {
@@ -36,8 +26,13 @@ const Home = () => {
 
   if (isLoading) {
     return (
-      <div className="font-mono p-4 flex justify-center items-center h-screen">
-        Loading...
+      <div className="font-mono p-4 flex flex-col gap-4 justify-center items-center h-screen">
+        <div>Loading...</div>
+        {connection.host && (
+          <div className="text-sm opacity-70">
+            Attempting to connect to {connection.host}:{connection.port}
+          </div>
+        )}
       </div>
     );
   }
@@ -57,12 +52,9 @@ const Home = () => {
       responses={responses}
       game={game}
       inputValue={inputValue}
-      filteredCommands={filteredCommands}
-      selectedIndex={selectedIndex}
-      showDropdown={showDropdown}
+      setInputValue={setInputValue}
       onGameChange={setGame}
       onInputChange={setInputValue}
-      onCommandSelect={handleCommandSelection}
       onCommandSubmit={sendCommand}
       onDisconnect={handleDisconnect}
       connectionInfo={`Connected to: ${connection.host}:${connection.port}`}

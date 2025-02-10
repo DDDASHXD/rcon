@@ -12,16 +12,38 @@ export const useRconConnection = () => {
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
-    const savedSettings = localStorage.getItem("rconSettings");
-    if (savedSettings) {
-      const settings = JSON.parse(savedSettings) as ConnectionSettings;
-      setConnection(settings);
-      handleConnect(settings).then(() => {
-        setIsLoading(false);
-      });
-    } else {
+    const tryConnect = async () => {
+      // Check URL parameters first
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        const urlHost = params.get("host");
+        const urlPort = params.get("port");
+        const urlPassword = params.get("password");
+
+        if (urlHost && urlPort && urlPassword) {
+          const urlSettings: ConnectionSettings = {
+            host: urlHost,
+            port: urlPort,
+            password: urlPassword
+          };
+          setConnection(urlSettings);
+          await handleConnect(urlSettings);
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Fall back to saved settings if no URL parameters
+      const savedSettings = localStorage.getItem("rconSettings");
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings) as ConnectionSettings;
+        setConnection(settings);
+        await handleConnect(settings);
+      }
       setIsLoading(false);
-    }
+    };
+
+    tryConnect();
   }, []);
 
   const handleConnect = async (settingsToUse = connection) => {

@@ -1,6 +1,4 @@
 import React from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -12,6 +10,8 @@ import { Response, GameConfig } from "@/types/rcon";
 import config from "@/config.json";
 import DarkModeToggle from "../dark-mode";
 import Link from "next/link";
+import Command from "../ui/command-input";
+import { useRconConnection } from "@/hooks/useRconConnection";
 
 const typedConfig = config as GameConfig;
 
@@ -19,12 +19,9 @@ interface CommandInterfaceProps {
   responses: Response[];
   game: string;
   inputValue: string;
-  filteredCommands: string[];
-  selectedIndex: number;
-  showDropdown: boolean;
+  setInputValue: (value: string) => void;
   onGameChange: (value: string) => void;
   onInputChange: (value: string) => void;
-  onCommandSelect: (command: string) => void;
   onCommandSubmit: (command: string) => Promise<boolean>;
   onDisconnect: () => void;
   connectionInfo: string;
@@ -34,27 +31,22 @@ export const CommandInterface: React.FC<CommandInterfaceProps> = ({
   responses,
   game,
   inputValue,
-  filteredCommands,
-  selectedIndex,
-  showDropdown,
+  setInputValue,
   onGameChange,
   onInputChange,
-  onCommandSelect,
   onCommandSubmit,
   onDisconnect,
   connectionInfo
 }) => {
-  const input = React.useRef<HTMLInputElement>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const {
+    connection: { password, host, port }
+  } = useRconConnection();
 
   const handleInput = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      if (showDropdown && filteredCommands.length > 0 && selectedIndex >= 0) {
-        e.preventDefault();
-        onCommandSelect(filteredCommands[selectedIndex]);
-      } else if (input.current?.value) {
-        await onCommandSubmit(input.current.value);
-      }
+      onCommandSubmit(inputValue);
+      setInputValue("");
     }
   };
 
@@ -68,6 +60,19 @@ export const CommandInterface: React.FC<CommandInterfaceProps> = ({
         <div className="flex justify-between items-center mb-4">
           <div className="text-sm text-gray-500">{connectionInfo}</div>
           <div className="flex gap-6">
+            <Link
+              href=""
+              className="text-sm hover:text-gray-700"
+              onClick={() => {
+                const url = new URL(window.location.origin);
+                url.searchParams.set("host", host);
+                url.searchParams.set("port", port);
+                url.searchParams.set("password", password);
+                navigator.clipboard.writeText(url.toString());
+              }}
+            >
+              Copy connection url
+            </Link>
             <Link
               href="https://github.com/DDDASHXD/rcon"
               className="text-sm hover:text-gray-700"
@@ -94,34 +99,13 @@ export const CommandInterface: React.FC<CommandInterfaceProps> = ({
         </div>
         <div className="flex items-center gap-2">
           {">"}
-          <div className="w-full flex relative">
-            <Input
-              type="text"
-              className="h-max w-full p-0 m-0"
-              value={inputValue}
-              onChange={(e) => onInputChange(e.target.value)}
-              ref={input}
-              onKeyDown={handleInput}
-              autoFocus
-            />
-            {showDropdown && filteredCommands.length > 0 && (
-              <div className="flex flex-col bg-background p-1 rounded-md absolute bottom-[calc(100%+10px)] max-h-[600px] overflow-y-auto border">
-                {filteredCommands.map((command, index) => (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={`justify-start h-max font-mono ${
-                      index === selectedIndex ? "bg-accent" : ""
-                    }`}
-                    key={command}
-                    onClick={() => onCommandSelect(command)}
-                  >
-                    {command} - {typedConfig[game].commandDescriptions[command]}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
+          <Command
+            commands={Object.keys(typedConfig[game].commandDescriptions)}
+            value={inputValue}
+            onChange={onInputChange}
+            onKeyDown={handleInput}
+          />
+          {inputValue}
           <Select onValueChange={onGameChange} value={game}>
             <SelectTrigger className="w-max h-max border-none p-0 m-0">
               <SelectValue placeholder="Select a game" />
